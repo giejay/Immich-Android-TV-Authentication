@@ -19,6 +19,12 @@ app.get("/", (req, res) => {
     })
 })
 
+app.get("/username", (req, res) => {
+    res.render("login-username", {
+        code: req.query.code
+    })
+})
+
 app.post("/register-device", (req, res) => {
     checkAuth(req, res, (res) => {
         const code = Math.floor(100000 + Math.random() * 900000);

@@ -13,8 +13,8 @@
     {{!-- Navigation links --}}
     <nav>
         <ul>
-            <li><a href="/?code={{code}}" style="color: blue; text-decoration: underline;">Login with API key</a></li>
-            <li><a href="/username?code={{code}}">Login with username</a></li>
+            <li><a href="/?code={{code}}">Login with API key</a></li>
+          <li><a href="/username?code={{code}}" style="color: blue; text-decoration: underline;">Login with username</a></li>
         </ul>
     </nav>
 
@@ -26,7 +26,7 @@
                   <img src="../immich-logo.svg" style="width: 150px; height: 150px; margin-bottom: 30px" class="rounded mx-auto d-block">
                 </div>
 
-                <form method="POST" action="/">
+                <form method="POST" action="/not-implemented">
                     <div class="mb-3">
                         <label for="name-lgn" class="form-label">Code</label>
                         <input placeholder="11111" type="text" class="form-control immich-input" id="code-lgn" name="code" value="{{code}}">
@@ -43,9 +43,7 @@
                     <button style="width: 100%; margin-top: 10px; background-color: rgb(172, 203, 250); border-radius: 15px; height: 40px" type="submit" class="btn">Login</button>
                 </form>
 
-              {{#if message }}
-                <h6 class="alert alert-danger mt-4">{{message}}</h6>
-              {{/if}}
+                <h6 class="alert alert-danger mt-4">Username login is being worked on!</h6>
             </div>
         </div>
     </div>

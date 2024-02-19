@@ -2,8 +2,8 @@ nav {
     background-color: black;
     color: white;
     display: flex;
-    justify-content: space-between;
-    padding: 30px 60px;
+    justify-content: center;
+    padding-top: 30px;
 }
 
 nav ul {
