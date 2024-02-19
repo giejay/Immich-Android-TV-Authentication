@@ -1,0 +1,55 @@
+nav {
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 30px 60px;
+}
+
+nav ul {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+nav li {
+    list-style: none;
+}
+
+nav li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 5px 8px;
+}
+
+nav li a:hover {
+    color: yellow;
+    text-decoration: none;
+}
+
+body {
+    background-color: black!important;
+}
+
+.form-label{
+    color: rgb(229, 231, 235);
+}
+
+.form-control{
+    background-color: rgb(75, 85, 99)!important;
+    border-color: rgb(75, 85, 99)!important;
+    color: white!important;
+}
+
+.immich-input{
+    border-radius: 0.75rem;
+    --tw-bg-opacity: 1;
+    /*background-color: rgb(226 232 240 / var(--tw-bg-opacity));*/
+    padding: 0.75rem;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    background-color: rgb(75 85 99 / var(--tw-bg-opacity));
+    --tw-text-opacity: 1;
+    /*color: rgb(var(--immich-dark-fg) / var(--tw-text-opacity));*/
+}

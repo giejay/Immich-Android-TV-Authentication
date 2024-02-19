@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  </head>
+</head>
+<body>
+    {{!-- Navigation links --}}
+    <nav>
+        <h4>Immich Android TV</h4>
+        <ul>
+            <li><a href="/">Login with API key</a></li>
+            <li><a href="/">Login with username (WIP)</a></li>
+        </ul>
+    </nav>
+
+    {{!-- Body --}}
+    <div class="container mt-4">
+        <div class="card" style="width: 38rem; background-color: rgb(33,33,33); margin: auto; border-radius: 30px;">
+            <div class="card-body">
+                <div style="margin: auto">
+                  <img src="../immich-logo.svg" style="width: 150px; height: 150px; margin-bottom: 30px" class="rounded mx-auto d-block">
+                </div>
+
+                <form method="POST" action="/">
+                    <div class="mb-3">
+                        <label for="name-lgn" class="form-label">Code</label>
+                        <input placeholder="11111" type="text" class="form-control immich-input" id="code-lgn" name="code" value="{{code}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="name-lgn" class="form-label">Host</label>
+                        <input placeholder="https://immich.com" type="text" class="form-control" name="host">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password-lgn" class="form-label">API Key</label>
+                        <input class="form-control" name="apiKey">
+                    </div>
+
+                    <button style="width: 100%; margin-top: 10px; background-color: rgb(172, 203, 250); border-radius: 15px; height: 40px" type="submit" class="btn">Login</button>
+                </form>
+
+              {{#if message }}
+                <h6 class="alert alert-danger mt-4">{{message}}</h6>
+              {{/if}}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
