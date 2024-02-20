@@ -13,8 +13,8 @@
     {{!-- Navigation links --}}
     <nav>
         <ul>
-            <li><a href="/?code={{code}}" style="color: blue; text-decoration: underline;">Login with API key</a></li>
-            <li><a href="/username?code={{code}}">Login with username</a></li>
+            <li><a href="/?code={{code}}" style="text-decoration: underline;">Login with API key</a></li>
+            <li><a href="/username?code={{code}}" style="font-weight: normal">Login with username</a></li>
         </ul>
     </nav>
 
@@ -25,6 +25,7 @@
                 <div style="margin: auto">
                   <img src="../immich-logo.svg" style="width: 150px; height: 150px; margin-bottom: 30px" class="rounded mx-auto d-block">
                 </div>
+                <h3 style="color: white; text-align: center; padding: 10px">Login to Immich Android TV</h3>
 
                 <form method="POST" action="/">
                     <div class="mb-3">
@@ -33,11 +34,11 @@
                     </div>
                     <div class="mb-3">
                         <label for="name-lgn" class="form-label">Host</label>
-                        <input placeholder="https://immich.com" type="text" class="form-control" name="host">
+                        <input value="{{host}}" placeholder="https://immich.com" type="text" class="form-control" name="host">
                     </div>
                     <div class="mb-3">
                         <label for="password-lgn" class="form-label">API Key</label>
-                        <input class="form-control" name="apiKey">
+                        <input value="{{apiKey}}" class="form-control" name="apiKey">
                     </div>
 
                     <button style="width: 100%; margin-top: 10px; background-color: rgb(172, 203, 250); border-radius: 15px; height: 40px" type="submit" class="btn">Login</button>

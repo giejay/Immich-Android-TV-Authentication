@@ -25,6 +25,57 @@ app.get("/username", (req, res) => {
     })
 })
 
+app.post("/username", (req, res) => {
+    const {code, email, password, host} = req.body;
+    if (!deviceCodes[code]) {
+        res.render("login-username", {
+            message: "Invalid code!",
+            email, password, host
+        });
+    } else {
+        const url = `${host}/api/auth/login`;
+        const body = JSON.stringify({
+            email,
+            password
+        });
+        fetch(url, {
+            method: 'POST',
+            body: body,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+            response.json().then(json => {
+                if (json.accessToken) {
+                    fetch(`${host}/api/api-key`, {
+                        method: 'POST',
+                        body: JSON.stringify({name: 'ImmichAndroidTV'}),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Cookie': `immich_access_token=${json.accessToken}`
+                        }
+                    }).then(apiKeyResponse => {
+                        apiKeyResponse.json().then(apiKey => {
+                            deviceCodes[code] = {apiKey: apiKey.secret, host}
+                            res.render("login-username", {
+                                message: `Success! Created API key with name: ${apiKey.apiKey.name} and will use that in the TV app.`,
+                                host, email, password
+                            })
+                        })
+                    })
+                } else {
+                    res.render("login-username", {
+                        message: "Invalid username/password!",
+                        host, email, password
+                    });
+                }
+            });
+        });
+    }
+})
+
 app.post("/register-device", (req, res) => {
     checkAuth(req, res, (res) => {
         const code = Math.floor(100000 + Math.random() * 900000);
@@ -37,17 +88,19 @@ app.post('/', (req, res) => {
     const {code, apiKey, host} = req.body;
     if (!deviceCodes[code]) {
         res.render("login", {
-            message: "Invalid code!"
+            message: "Invalid code!",
+            apiKey, host
         });
     } else {
         deviceCodes[code] = {apiKey, host}
         res.render("login", {
-            message: "Registered your device!"
+            message: "Registered your device!",
+            apiKey, host
         });
     }
 });
 
-app.get("/access-token/:deviceCode", (req, res) => {
+app.get("/config/:deviceCode", (req, res) => {
     checkAuth(req, res, (res) => {
         const configuration = deviceCodes[req.params.deviceCode];
         if (!configuration) {
