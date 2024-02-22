@@ -1,5 +1,6 @@
 const express = require('express');
-const path = require("path")
+const path = require("path");
+const ExpiryMap = require('expiry-map');
 
 const app = express();
 
@@ -11,7 +12,8 @@ app.use(express.json())
 
 app.set('view engine', 'hbs')
 
-const deviceCodes = {};
+const deviceCodes = new ExpiryMap(180000, [
+]);
 
 app.get("/", (req, res) => {
     res.render("login", {
@@ -27,7 +29,7 @@ app.get("/username", (req, res) => {
 
 app.post("/username", (req, res) => {
     const {code, email, password, host} = req.body;
-    if (!deviceCodes[code]) {
+    if (!deviceCodes.get(code)) {
         res.render("login-username", {
             message: "Invalid code!",
             email, password, host
@@ -58,7 +60,7 @@ app.post("/username", (req, res) => {
                         }
                     }).then(apiKeyResponse => {
                         apiKeyResponse.json().then(apiKey => {
-                            deviceCodes[code] = {apiKey: apiKey.secret, host}
+                            deviceCodes.set(code, {apiKey: apiKey.secret, host});
                             res.render("login-username", {
                                 message: `Success! Created API key with name: ${apiKey.apiKey.name} and will use that in the TV app.`,
                                 host, email, password
@@ -78,21 +80,21 @@ app.post("/username", (req, res) => {
 
 app.post("/register-device", (req, res) => {
     checkAuth(req, res, (res) => {
-        const code = Math.floor(100000 + Math.random() * 900000);
-        deviceCodes[code] = {};
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        deviceCodes.set(code, {});
         res.send({code})
     })
 });
 
 app.post('/', (req, res) => {
     const {code, apiKey, host} = req.body;
-    if (!deviceCodes[code]) {
+    if (!deviceCodes.get(code)) {
         res.render("login", {
             message: "Invalid code!",
             apiKey, host
         });
     } else {
-        deviceCodes[code] = {apiKey, host}
+        deviceCodes.set(code, {apiKey, host});
         res.render("login", {
             message: "Registered your device!",
             apiKey, host
@@ -101,8 +103,9 @@ app.post('/', (req, res) => {
 });
 
 app.get("/config/:deviceCode", (req, res) => {
+    const deviceCode = req.params.deviceCode;
     checkAuth(req, res, (res) => {
-        const configuration = deviceCodes[req.params.deviceCode];
+        const configuration = deviceCodes.get(deviceCode);
         if (!configuration) {
             res.send({
                 status: 'NOT_FOUND'
@@ -112,7 +115,7 @@ app.get("/config/:deviceCode", (req, res) => {
                 status: 'NO_CONFIG'
             })
         } else {
-            delete deviceCodes[req.params.deviceCode]
+            deviceCodes.delete(deviceCode);
             res.send({
                 status: 'SUCCESS',
                 configuration
