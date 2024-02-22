@@ -80,11 +80,19 @@ app.post("/username", (req, res) => {
 
 app.post("/register-device", (req, res) => {
     checkAuth(req, res, (res) => {
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        deviceCodes.set(code, {});
-        res.send({code})
+        res.send({code: getDeviceCode()})
     })
 });
+
+function getDeviceCode(){
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    if(!deviceCodes.get(code)){
+        deviceCodes.set(code, {});
+        return code
+    } else {
+        return getDeviceCode();
+    }
+}
 
 app.post('/', (req, res) => {
     const {code, apiKey, host} = req.body;
