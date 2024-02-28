@@ -1,16 +1,14 @@
-const express = require('express');
 const path = require("path");
 const ExpiryMap = require('expiry-map');
-
-const app = express();
+const http = require('http');
+const express = require('express');
+const app = require('@root/async-router').Router();
 
 const publicDir = path.join(__dirname, './public')
 
 app.use(express.static(publicDir))
 app.use(express.urlencoded({extended: 'false'}))
 app.use(express.json())
-
-app.set('view engine', 'hbs')
 
 const deviceCodes = new ExpiryMap(180000, [
 ]);
@@ -27,7 +25,7 @@ app.get("/username", (req, res) => {
     })
 })
 
-app.post("/username", (req, res) => {
+app.post("/username", async (req, res) => {
     const {code, email, password, host} = req.body;
     if (!deviceCodes.get(code)) {
         res.render("login-username", {
@@ -40,41 +38,56 @@ app.post("/username", (req, res) => {
             email,
             password
         });
-        fetch(url, {
-            method: 'POST',
-            body: body,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        }).then(response => {
-            response.json().then(json => {
-                if (json.accessToken) {
-                    fetch(`${host}/api/api-key`, {
-                        method: 'POST',
-                        body: JSON.stringify({name: 'ImmichAndroidTV'}),
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'Cookie': `immich_access_token=${json.accessToken}`
-                        }
-                    }).then(apiKeyResponse => {
-                        apiKeyResponse.json().then(apiKey => {
-                            deviceCodes.set(code, {apiKey: apiKey.secret, host});
-                            res.render("login-username", {
-                                message: `Success! Created API key with name: ${apiKey.apiKey.name} and will use that in the TV app.`,
-                                host, email, password
-                            })
-                        })
-                    })
-                } else {
-                    res.render("login-username", {
-                        message: "Invalid username/password!",
-                        host, email, password
-                    });
+        let loginResponse;
+        try {
+            loginResponse = await (await fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
+            })).json();
+        } catch(e){
+            console.error(e);
+            res.render("login-username", {
+                message: "Invalid hostname!",
+                email, password, host, code
             });
-        });
+            return;
+        }
+        if (loginResponse.accessToken) {
+            let apiKeyResponse;
+            try {
+                apiKeyResponse = await (await fetch(`${host}/api/api-key`, {
+                    method: 'POST',
+                    body: JSON.stringify({name: 'ImmichAndroidTV'}),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Cookie': `immich_access_token=${loginResponse.accessToken}`
+                    }
+                })).json();
+            } catch (e){
+                console.error(e);
+                res.render("login-username", {
+                    message: "Error occurred while creating API key, please contact developer.",
+                    email, password, host, code
+                });
+                return;
+            }
+
+            deviceCodes.set(code, {apiKey: apiKeyResponse.secret, host});
+            res.render("login-username", {
+                message: `Success! Created API key with name: ${apiKeyResponse.apiKey.name} and will use that in the TV app.`,
+                host, email, password, code
+            })
+        } else {
+            res.render("login-username", {
+                message: "Invalid username/password!",
+                host, email, password, code
+            });
+        }
     }
 })
 
@@ -83,16 +96,6 @@ app.post("/register-device", (req, res) => {
         res.send({code: getDeviceCode()})
     })
 });
-
-function getDeviceCode(){
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    if(!deviceCodes.get(code)){
-        deviceCodes.set(code, {});
-        return code
-    } else {
-        return getDeviceCode();
-    }
-}
 
 app.post('/', (req, res) => {
     const {code, apiKey, host} = req.body;
@@ -132,6 +135,16 @@ app.get("/config/:deviceCode", (req, res) => {
     })
 });
 
+function getDeviceCode(){
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    if(!deviceCodes.get(code)){
+        deviceCodes.set(code, {});
+        return code
+    } else {
+        return getDeviceCode();
+    }
+}
+
 function checkAuth(req, res, callback) {
     if (process.env.API_KEY !== req.get('x-api-key')) {
         res.send(403, 'Invalid API Key')
@@ -140,6 +153,8 @@ function checkAuth(req, res, callback) {
     }
 }
 
-app.listen(5000, () => {
-    console.log("server started on port 5000")
-})
+// Start node.js express server
+const server = express().use('/', app).set('view engine', 'hbs');
+http.createServer(server).listen(5000, function () {
+    console.info('Listening on', this.address());
+});
