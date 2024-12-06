@@ -159,6 +159,6 @@ function checkAuth(req, res, callback) {
 
 // Start node.js express server
 const server = express().use('/', app).set('view engine', 'hbs');
-http.createServer(server).listen(5001, function () {
+http.createServer(server).listen(5000, function () {
     console.info('Listening on', this.address());
 });
