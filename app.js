@@ -10,8 +10,7 @@ app.use(express.static(publicDir))
 app.use(express.urlencoded({extended: 'false'}))
 app.use(express.json())
 
-const deviceCodes = new ExpiryMap(180000, [
-]);
+const deviceCodes = new ExpiryMap(180000, []);
 
 app.get("/", (req, res) => {
     res.render("login", {
@@ -48,7 +47,7 @@ app.post("/username", async (req, res) => {
                     'Accept': 'application/json'
                 }
             })).json();
-        } catch(e){
+        } catch (e) {
             console.error(e);
             res.render("login-username", {
                 message: "Invalid hostname!",
@@ -59,16 +58,21 @@ app.post("/username", async (req, res) => {
         if (loginResponse.accessToken) {
             let apiKeyResponse;
             try {
-                apiKeyResponse = await (await fetch(`${host}/api/api-key`, {
+                apiKeyResponse = await (await fetch(`${host}/api/api-keys`, {
                     method: 'POST',
-                    body: JSON.stringify({name: 'ImmichAndroidTV'}),
+                    body: JSON.stringify({
+                        name: 'ImmichAndroidTV',
+                        permissions: ["album.read", "activity.read", "asset.read", "asset.view", "asset.download", "album.read",
+                            "album.download", "archive.read", "face.read", "library.read", "timeline.read", "memory.read", "partner.read",
+                            "person.read", "session.read", "tag.read", "tag.asset"]
+                    }),
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'Cookie': `immich_access_token=${loginResponse.accessToken}`
                     }
                 })).json();
-            } catch (e){
+            } catch (e) {
                 console.error(e);
                 res.render("login-username", {
                     message: "Error occurred while creating API key, please contact developer.",
@@ -135,9 +139,9 @@ app.get("/config/:deviceCode", (req, res) => {
     })
 });
 
-function getDeviceCode(){
+function getDeviceCode() {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    if(!deviceCodes.get(code)){
+    if (!deviceCodes.get(code)) {
         deviceCodes.set(code, {});
         return code
     } else {
@@ -155,6 +159,6 @@ function checkAuth(req, res, callback) {
 
 // Start node.js express server
 const server = express().use('/', app).set('view engine', 'hbs');
-http.createServer(server).listen(5000, function () {
+http.createServer(server).listen(5001, function () {
     console.info('Listening on', this.address());
 });
